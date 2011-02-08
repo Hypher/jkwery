@@ -63,9 +63,11 @@ function parseArguments() {
  */
 
 function parse(html, calls) {
-  var window = jsdom.jsdom(html, null, jsdomOptions).createWindow()
+  var normalized = wrap(html)
+    , wrapped = html != normalized
+    , window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow()
     , $ = jquery.create(window)
-    , ctx = $('*')
+    , ctx = $(wrapped ? 'body' : '*')
     , call;
 
   while (call = calls.shift()) {
@@ -86,3 +88,12 @@ function parse(html, calls) {
   console.log(ctx.html());  
 }
 
+/**
+ * Wrap to prevent breakage for frags.
+ */
+
+function wrap(html) {
+  if (!~html.indexOf('<body')) html = '<body>' + html + '</body>';
+  if (!~html.indexOf('<html')) html = '<html>' + html + '</html>';
+  return html;
+}

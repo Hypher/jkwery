@@ -13,3 +13,7 @@
   
     $ curl http://twitter.com | query 'a#logo img' attr alt
     Twitter
+
+  Alternately, since the output is simply more html, we can achieve this same result via pipes:
+  
+    $ curl http://twitter.com | query 'a#logo' | query img attr alt
