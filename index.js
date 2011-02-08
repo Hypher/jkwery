@@ -47,8 +47,10 @@ function parseArguments() {
 
   while (args.length) {
     switch (arg = args.shift()) {
+      case 'width':
+      case 'height':
       case 'parent':
-        calls.push(['method', arg])
+        calls.push(['method', arg, []])
         break;
       case 'attr':
       case 'hasClass':
@@ -81,6 +83,11 @@ function parse(html, calls) {
           case 'parent':
             ctx = ctx.parent();
             break;
+          case 'width':
+          case 'height':
+            // TODO: fix me! jsdom breakage
+            call[2][0] = call[1];
+            call[1] = 'attr';
           case 'attr':
           case 'hasClass':
             console.log(ctx[call[1]].apply(ctx, call[2]));
