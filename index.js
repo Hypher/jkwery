@@ -56,7 +56,6 @@ function parseArguments() {
       case 'parent':
         calls.push(['method', arg, []])
         break;
-      case 'at':
       case 'get':
         arg = 'eq';
       case 'eq':
