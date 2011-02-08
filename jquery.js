@@ -14,6 +14,63 @@
  * Date: Sat Feb 13 22:33:48 2010 -0500
  */
 
+
+exports.getJQueryFns = function() {
+
+//	var jsdom = require('jsdom');
+//	var window = jsdom.jsdom("", null).createWindow();
+//	var jQuery = exports.create(window);
+//	jQuery.fn.parent = function(){};
+
+
+	var fnv = function(isV, min, max) {
+		if(!min) return [isV, 0];
+		if(!max) return [isV, min];
+		return [isV, min, max];
+	};
+	var fn = function(min, max) {
+		return fnv(true, min, max);
+	};
+	var v = function(min, max) {
+		return fnv(false, min, max);
+	};
+
+	var jQueryFns = {
+		
+		add: fn(1),
+		andSelf: fn(),
+		attr: fn(1),
+		children: fn(0,1),
+		closest: fn(1),
+		contents: fn(),
+		eq: fn(1),
+		filter: fn(1),
+		find: fn(1),
+		first: fn(),
+		has: fn(1),
+		hasClass: v(1),
+		html: v(0),
+		is: v(1),
+		last: fn(),
+		next: fn(0,1),
+		nextAll: fn(0,1),
+		nextUntil: fn(1),
+		not: fn(1),
+		offsetParent: fn(),
+		parent: fn(0,1),
+		parents: fn(0,1),
+		parentsUntil: fn(1),
+		prev: fn(0,1),
+		prevAll: fn(0,1),
+		prevUntil: fn(1),
+		siblings: fn(0,1),
+		slice: fn(2),
+		val: v(0)
+		
+	};
+	return jQueryFns;
+}
+
 exports.create = function( window, undefined ) {
 
 window.XMLHttpRequest = function(){};

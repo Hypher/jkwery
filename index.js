@@ -4,121 +4,156 @@
  * Module dependencies.
  */
 
-var jsdom = require('jsdom')
-  , jquery = require('./jquery');
+var jsdom = require('jsdom'),
+    jquery = require('./jquery');
+
 
 /**
  * jsdom options.
  */
 
 var jsdomOptions = {
-  features: {
-      FetchExternalResources: false
-    , ProcessExternalResources: false
-  }
+    features: {
+        FetchExternalResources: false,
+        ProcessExternalResources: false
+    }
+};
+
+
+
+/**
+ *  Input command aliases
+ */
+
+var aliases = {
+    'get': 'eq'
 };
 
 /**
  * Buffer stdin.
  */
 
-var stdin = process.openStdin()
-  , buf = '';
+var stdin = process.openStdin(),
+    buf = '';
+
+var calls = parseArguments();
 
 stdin.setEncoding('utf8');
-stdin
-  .on('data', function(chunk){ buf += chunk; })
-  .on('end', parseArguments);
+stdin.on('data', function (chunk) { buf += chunk; })
+     .on('end', function () {  processHTML(buf, calls); });
 
 /**
  * Parse argv.
  */
 
+
+function Call(name, params) {
+    this.name = name;
+    this.params = params;
+}
+Call.prototype.appendParam = function appendParam(param) {
+    this.params.push(param);
+};
+
+function JQueryCall(name, params, returnsJQuery) {
+    Call.call(this, name, params);
+    this.returnsJQuery = returnsJQuery;
+}
+JQueryCall.prototype = new Call();
+
+
 function parseArguments() {
-  var arg
-    , args = process.argv.slice(2)
-    , calls = [];
+    var arg;
+    var args = process.argv.slice(2);
+    var jQueryFns = jquery.getJQueryFns();
 
-  function required() {
-    if (args.length) return [args.shift()];
-    console.log(arg + ' requires an argument');
-    process.exit(1);
-  }
+    var pendingParams = 0; // if nonzero, next args can be optional params
+    var calls = [];
 
-  while (args.length) {
-    switch (arg = args.shift()) {
-      case 'val':
-      case 'text':
-      case 'first':
-      case 'last':
-      case 'width':
-      case 'height':
-      case 'parent':
-      case 'next':
-      case 'prev':
-        calls.push(['method', arg, []])
-        break;
-      case 'get':
-        arg = 'eq';
-      case 'eq':
-      case 'attr':
-      case 'hasClass':
-        calls.push(['method', arg, required(1)])
-        break;
-      default:
-        calls.push(['selector', arg])
+    function parseParams(fndef) {
+        var params = args.splice(0, fndef[1]);
+        if (params.length < fndef[1]) {
+            console.log(arg + ' requires at least ' + fndef[1] + ' argument' + (fndef[1] > 1 ? 's' : ''));
+            process.exit(1);
+        }
+        if (fndef.lengh > 2) { // optional params
+            pendingParams = fndef[2] - fndef[1];
+        }
+        return params;
     }
-  }
 
-  parse(buf, calls);
+    while (args.length) {
+        arg = args.shift();
+        if (arg in aliases) arg = aliases[arg];
+        switch (arg) {
+            // handle special cases
+        case 'width':
+        case 'height':
+            calls.push(new SpecialCall(arg));
+            break;
+        default:
+            // any jQuery.fn function name
+            var fndef;
+            if (arg[0] != "'" && arg[0] != '"' && (fndef = jQueryFns[arg])) {
+                var params = parseParams(fndef);
+                calls.push(new JQueryCall(arg, params, fndef[0]));
+            } else {
+                if (pendingParams) {
+                    calls[calls.length - 1].appendParam(arg);
+                } else { // else treated as a selector
+                    calls.push(new JQueryCall('find', [arg], true));
+                }
+            }
+        }
+    }
+
+    return calls;
 }
 
 /**
  * Parse and apply jQuery.
  */
 
-function parse(html, calls) {
-  var normalized = wrap(html)
-    , wrapped = html != normalized
-    , window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow()
-    , $ = jquery.create(window)
-    , ctx = $(wrapped ? 'body' : '*')
-    , call;
-
-  while (call = calls.shift()) {
-    switch (call[0]) {
-      case 'method':
-        switch (call[1]) {
-          case 'eq':
-          case 'first':
-          case 'last':
-          case 'prev':
-          case 'next':
-            ctx = ctx[call[1]].apply(ctx, call[2]);
-            break;
-          case 'parent':
-            ctx = ctx.parent();
-            break;
-          case 'width':
-          case 'height':
-            // TODO: fix me! jsdom breakage
-            call[2][0] = call[1];
-            call[1] = 'attr';
-          case 'val':
-          case 'attr':
-          case 'text':
-          case 'hasClass':
-            console.log(ctx[call[1]].apply(ctx, call[2]));
-            process.exit();
-            break;
-        }
-        break;
-      case 'selector':
-        ctx = ctx.find(call[1]);
+function processHTML(html, calls) {
+    var normalized = wrap(html),
+        wrapped = html != normalized,
+        window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow(),
+        $ = jquery.create(window),
+        ctx = $(wrapped ? 'body' : '*'),
+        call;
+	
+    while (call = calls.shift()) {
+        if (call.constructor === JQueryCall) {
+            if (call.returnsJQuery) {
+                ctx = ctx[call.name].apply(ctx, call.params);
+            } else {
+                returns(ctx[call.name].apply(ctx, call.params)); // return value
+            }
+        } else if (call.constructor === SpecialCall) {
+            switch (call.name) {
+				case 'width':
+				case 'height':
+					returns(ctx.attr(call.name));
+				break;
+            }
+        } else {
+			returns("Wtf? call.constructor = "+call.constructor.name);
+		}
     }
-  }
 
-  console.log(ctx.html());  
+    var output = [];
+    ctx.each(function () {
+        output.push($(this).html());
+    });
+    returns(output.join('\n'));
+}
+
+function returns(value) {
+    console.log(value);
+    if (typeof value === 'boolean' || typeof value === 'number' && value == parseInt(value)) {
+		process.exit(Number(value));
+	}
+    process.exit();
 }
 
 /**
@@ -126,7 +161,7 @@ function parse(html, calls) {
  */
 
 function wrap(html) {
-  if (!~html.indexOf('<body')) html = '<body>' + html + '</body>';
-  if (!~html.indexOf('<html')) html = '<html>' + html + '</html>';
-  return html;
+    if (!~html.indexOf('<body')) html = '<body>' + html + '</body>';
+    if (!~html.indexOf('<html')) html = '<html>' + html + '</html>';
+    return html;
 }
