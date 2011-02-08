@@ -5,6 +5,7 @@
   "keywords": ["jquery", "html", "jsdom", "dom"],
   "author": "TJ Holowaychuk",
   "main": "index",
+  "bin": { "query": "./index.js" },
   "engines": {
     "node": "*"
   }
