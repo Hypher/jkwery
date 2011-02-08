@@ -45,8 +45,7 @@ function parseArguments() {
     process.exit(1);
   }
 
-  while (args.length) {
-    arg = args.shift();
+  while (arg = args.shift()) {
     switch (arg) {
       case 'attr':
         calls.push(['method', arg, required(1)])
