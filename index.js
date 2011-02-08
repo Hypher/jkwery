@@ -19,8 +19,6 @@ var jsdomOptions = {
     }
 };
 
-
-
 /**
  *  Input command aliases
  */
@@ -42,10 +40,11 @@ stdin.setEncoding('utf8');
 stdin.on('data', function (chunk) { buf += chunk; })
      .on('end', function () {  processHTML(buf, calls); });
 
+
+
 /**
  * Parse argv.
  */
-
 
 function Call(name, params) {
     this.name = name;
@@ -94,7 +93,12 @@ function parseArguments() {
         default:
             // any jQuery.fn function name
             var fndef;
-            if (arg[0] != "'" && arg[0] != '"' && (fndef = jQueryFns[arg])) {
+			var escaped = false;
+			if (arg[0] === "'" || arg[0] === '"') {
+				arg = arg.substr(1, arg.length-2);
+				escaped = true;
+			}
+            if (!escaped && (fndef = jQueryFns[arg])) {
                 var params = parseParams(fndef);
                 calls.push(new JQueryCall(arg, params, fndef[0]));
             } else {
@@ -111,7 +115,7 @@ function parseArguments() {
 }
 
 /**
- * Parse and apply jQuery.
+ * Parse and apply jQuery & special calls.
  */
 
 function processHTML(html, calls) {

@@ -17,24 +17,22 @@
 
 exports.getJQueryFns = function() {
 
-//	var jsdom = require('jsdom');
-//	var window = jsdom.jsdom("", null).createWindow();
-//	var jQuery = exports.create(window);
-//	jQuery.fn.parent = function(){};
-
-
+	// internal use
 	var fnv = function(isV, min, max) {
 		if(!min) return [isV, 0];
 		if(!max) return [isV, min];
 		return [isV, min, max];
 	};
+	// a jQuery function taking between min and max parameters and returning a jQuery object
 	var fn = function(min, max) {
 		return fnv(true, min, max);
 	};
+	// a jQuery function taking between min and max parameters and returning a value
 	var v = function(min, max) {
 		return fnv(false, min, max);
 	};
 
+	// List of jQuery functions usable in the command line
 	var jQueryFns = {
 		
 		add: fn(1),
