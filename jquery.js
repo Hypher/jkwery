@@ -19,8 +19,8 @@ exports.getJQueryFns = function() {
 
 	// internal use
 	var fnv = function(isV, min, max) {
-		if(!min) return [isV, 0];
-		if(!max) return [isV, min];
+		if(min === undefined) return [isV, 0];
+		if(max === undefined) return [isV, min];
 		return [isV, min, max];
 	};
 	// a jQuery function taking between min and max parameters and returning a jQuery object

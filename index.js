@@ -27,24 +27,6 @@ var aliases = {
     'get': 'eq'
 };
 
-/**
- * Buffer stdin.
- */
-
-var stdin = process.openStdin(),
-    buf = '';
-
-var calls = parseArguments();
-
-stdin.setEncoding('utf8');
-stdin.on('data', function (chunk) { buf += chunk; })
-     .on('end', function () {  processHTML(buf, calls); });
-
-
-
-/**
- * Parse argv.
- */
 
 function Call(name, params) {
     this.name = name;
@@ -61,6 +43,10 @@ function JQueryCall(name, params, returnsJQuery) {
 JQueryCall.prototype = new Call();
 
 
+/**
+ * Parse argv.
+ */
+
 function parseArguments() {
     var arg;
     var args = process.argv.slice(2);
@@ -75,9 +61,9 @@ function parseArguments() {
             console.log(arg + ' requires at least ' + fndef[1] + ' argument' + (fndef[1] > 1 ? 's' : ''));
             process.exit(1);
         }
-        if (fndef.lengh > 2) { // optional params
-            pendingParams = fndef[2] - fndef[1];
-        }
+        // optional params ?
+		pendingParams = (fndef.length > 2) ? fndef[2] - fndef[1] : 0;
+		
         return params;
     }
 
@@ -99,12 +85,15 @@ function parseArguments() {
 				escaped = true;
 			}
             if (!escaped && (fndef = jQueryFns[arg])) {
+				console.log(arg);
                 var params = parseParams(fndef);
                 calls.push(new JQueryCall(arg, params, fndef[0]));
             } else {
                 if (pendingParams) {
                     calls[calls.length - 1].appendParam(arg);
+					pendingParams--;
                 } else { // else treated as a selector
+					pendingParams = 0;
                     calls.push(new JQueryCall('find', [arg], true));
                 }
             }
@@ -169,3 +158,19 @@ function wrap(html) {
     if (!~html.indexOf('<html')) html = '<html>' + html + '</html>';
     return html;
 }
+
+
+/**
+ * Buffer stdin.
+ */
+
+var stdin = process.openStdin(),
+    buf = '';
+
+var calls = parseArguments();
+returns(calls);
+
+stdin.setEncoding('utf8');
+stdin.on('data', function (chunk) { buf += chunk; })
+     .on('end', function () {  processHTML(buf, calls); });
+
