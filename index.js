@@ -56,6 +56,7 @@ function parseArguments() {
       case 'parent':
         calls.push(['method', arg, []])
         break;
+      case 'eq':
       case 'attr':
       case 'hasClass':
         calls.push(['method', arg, required(1)])
@@ -84,6 +85,7 @@ function parse(html, calls) {
     switch (call[0]) {
       case 'method':
         switch (call[1]) {
+          case 'eq':
           case 'first':
           case 'last':
             ctx = ctx[call[1]].apply(ctx, call[2]);
