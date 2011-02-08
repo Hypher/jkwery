@@ -72,11 +72,14 @@ exports.getJQueryFns = function() {
 
 exports.getJQueryProps = function() {
 
+	// if a prop is true, its a DOMElement prop and jQuery.get is called before evaluation
 	var jQueryProps = {
 		length:false,
 		selector:false,
 		
-		//tagName:true
+		tagName:true,
+		width:true,
+		height:true
 	};
 	return jQueryProps;
 }

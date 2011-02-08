@@ -44,8 +44,9 @@ function JQueryCall(name, params, returnsJQuery) {
 }
 JQueryCall.prototype = new Call();
 
-function JQueryProp(name) {
+function JQueryProp(name, mustGet) {
 	this.name = name;
+	this.mustGet = mustGet || false;
 }
 
 /**
@@ -79,10 +80,7 @@ function parseArguments() {
         if (arg in aliases) arg = aliases[arg];
         switch (arg) {
             // handle special cases
-			case 'width':
-			case 'height':
 			case 'outerHTML':
-			case 'tagName':
 				calls.push(new Call(arg));
 				break;
 			default:
@@ -97,7 +95,7 @@ function parseArguments() {
 					var params = parseParams(fndef);
 					calls.push(new JQueryCall(arg, params, fndef[0]));
 				} else if(!escaped && (arg in jQueryProps)) {
-					calls.push(new JQueryProp(arg));
+					calls.push(new JQueryProp(arg, jQueryProps[arg]));
 				} else {
 					if (pendingParams) {
 						calls[calls.length - 1].appendParam(arg);
@@ -134,18 +132,14 @@ function processHTML(html, calls) {
                 returns(ctx[call.name].apply(ctx, call.params)); // return value
             }
         } else if (call instanceof JQueryProp) {
-			returns(ctx[call.name]);
+			returns(ctx.map(function(){
+					if(call.mustGet) return this[call.name];
+					else return $(this)[call.name][0];
+				}).get().join('\n'));
 		} else {
             switch (call.name) {
-				case 'width':
-				case 'height':
-					returns(ctx.attr(call.name));
-				break;
 				case 'outerHTML':
 					ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
-				break;
-				case 'tagName':
-					returns(ctx.map(function(){ return this.tagName; }).get().join('\n'));
 				break;
 				default:
 					console.log("Unknown call "+call.name);
