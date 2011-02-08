@@ -44,9 +44,9 @@ function JQueryCall(name, params, returnsJQuery) {
 }
 JQueryCall.prototype = new Call();
 
-function JQueryProp(name, mustGet) {
+function JQueryProp(name, htmlProp) {
 	this.name = name;
-	this.mustGet = mustGet || false;
+	this.htmlProp = htmlProp || false;
 }
 
 /**
@@ -59,6 +59,7 @@ function parseArguments() {
     var jQueryFns = jquery.getJQueryFns();
 	var jQueryProps = jquery.getJQueryProps();
 
+	var explain = false; // if true, only output what it will do
     var pendingParams = 0; // if nonzero, next args can be optional params
     var calls = [];
 
@@ -77,9 +78,19 @@ function parseArguments() {
 	
     while (args.length) {
         arg = args.shift();
+		
         if (arg in aliases) arg = aliases[arg];
+		
         switch (arg) {
             // handle special cases
+			case '--explain':
+				explain = true;
+			break;
+			case '--help':
+				//printHelp(); // TODO
+				return false;
+			break;
+			
 			case 'outerHTML':
 				calls.push(new Call(arg));
 				break;
@@ -109,7 +120,36 @@ function parseArguments() {
         }
     }
 
-    return calls;
+	if(explain) {
+		for(var i=0; i<calls.length; i++) {
+			var call = calls[i];
+			if(call instanceof JQueryCall) {
+				var verb = call.returnsJQuery ? "Call" : "Return";
+				console.log(verb+" $."+call.name+"("+call.params.join(',')+")");
+				if(!call.returnsJQuery && (i < calls.length-1)) {
+					console.log("("+(calls.length-i+1)+" arguments will be ignored)");
+					return false;
+				}
+			} else if(call instanceof JQueryProp) {
+				if(call.htmlProp)
+					console.log("Return [DOMElement]."+call.name+" of each $");
+				else
+					console.log("Return each $."+call.name);
+			} else {
+				switch(call.name) {
+					case 'outerHTML':
+						console.log("outerHTML wraps all $ elements in a separate document");
+					break;
+					default:
+						console.log("Error: unsupported call "+call.name);
+				}
+			}
+		}
+		
+		return false;
+	}
+    
+	return calls;
 }
 
 /**
@@ -133,7 +173,7 @@ function processHTML(html, calls) {
             }
         } else if (call instanceof JQueryProp) {
 			returns(ctx.map(function(){
-					if(call.mustGet) return this[call.name];
+					if(call.htmlProp) return this[call.name];
 					else return $(this)[call.name][0];
 				}).get().join('\n'));
 		} else {
@@ -180,7 +220,10 @@ function wrap(html) {
 var stdin = process.openStdin(),
     buf = '';
 
+
 var calls = parseArguments();
+if(!calls) // surely in --explain mode (or --help)
+	process.exit(0);
 
 stdin.setEncoding('utf8');
 stdin.on('data', function (chunk) { buf += chunk; })
