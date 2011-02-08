@@ -1,7 +1,7 @@
 
 # Query
 
- jQuery for the command-line, written with [node](http://nodejs.org), jQuery of course, and jsdom.
+ jQuery for the command-line, written with [node](http://nodejs.org), jQuery of course, and jsdom, currently supporting a small subset of jquery functionality due to some jsdom/htmlparser issues.
 
 ## Installation
 
