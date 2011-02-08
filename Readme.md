@@ -23,3 +23,7 @@
   
     $ curl http://twitter.com | query .article '#timeline' hasClass statuses
     true
+
+  Grab width or height attributes:
+  
+    $ echo '<div class="user" width="300"></div>' | ./index.js div.user width
