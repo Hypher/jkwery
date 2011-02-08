@@ -38,3 +38,8 @@
   
     $ echo '<input type="text" value="tj@vision-media.ca"/>' | query input val
     tj@vision-media.ca
+  
+  Get second li's text:
+  
+    $ echo $list | query ul li get 1 text
+    two
