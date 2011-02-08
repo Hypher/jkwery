@@ -42,7 +42,6 @@ function JQueryCall(name, params, returnsJQuery) {
 }
 JQueryCall.prototype = new Call();
 
-
 /**
  * Parse argv.
  */
@@ -74,7 +73,7 @@ function parseArguments() {
             // handle special cases
         case 'width':
         case 'height':
-            calls.push(new SpecialCall(arg));
+            calls.push(new Call(arg));
             break;
         default:
             // any jQuery.fn function name
@@ -85,8 +84,7 @@ function parseArguments() {
 				escaped = true;
 			}
             if (!escaped && (fndef = jQueryFns[arg])) {
-				console.log(arg);
-                var params = parseParams(fndef);
+				var params = parseParams(fndef);
                 calls.push(new JQueryCall(arg, params, fndef[0]));
             } else {
                 if (pendingParams) {
@@ -122,7 +120,7 @@ function processHTML(html, calls) {
             } else {
                 returns(ctx[call.name].apply(ctx, call.params)); // return value
             }
-        } else if (call.constructor === SpecialCall) {
+        } else if (call.constructor === Call) {
             switch (call.name) {
 				case 'width':
 				case 'height':
@@ -168,7 +166,6 @@ var stdin = process.openStdin(),
     buf = '';
 
 var calls = parseArguments();
-returns(calls);
 
 stdin.setEncoding('utf8');
 stdin.on('data', function (chunk) { buf += chunk; })
