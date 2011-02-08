@@ -24,7 +24,8 @@ var jsdomOptions = {
  */
 
 var aliases = {
-    'get': 'eq'
+    'get': 'eq',
+	'count': 'length'
 };
 
 
@@ -73,6 +74,8 @@ function parseArguments() {
             // handle special cases
         case 'width':
         case 'height':
+		case 'outerHTML':
+		case 'length':
             calls.push(new Call(arg));
             break;
         default:
@@ -114,22 +117,26 @@ function processHTML(html, calls) {
         call;
 	
     while (call = calls.shift()) {
-        if (call.constructor === JQueryCall) {
+		if (call instanceof JQueryCall) {
             if (call.returnsJQuery) {
                 ctx = ctx[call.name].apply(ctx, call.params);
             } else {
                 returns(ctx[call.name].apply(ctx, call.params)); // return value
             }
-        } else if (call.constructor === Call) {
+        } else {
             switch (call.name) {
 				case 'width':
 				case 'height':
 					returns(ctx.attr(call.name));
 				break;
+				case 'length':
+					returns(ctx.length);
+				break;
+				case 'outerHTML':
+					ctx.map(function(){ return $('<html/>').append(this); });
+				break;
             }
-        } else {
-			returns("Wtf? call.constructor = "+call.constructor.name);
-		}
+        }
     }
 
     var output = [];
