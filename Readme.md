@@ -33,3 +33,8 @@
   
     $ echo '<p>very <em>slick</em></p>' | query p text
     very slick
+
+  Values:
+  
+    $ echo '<input type="text" value="tj@vision-media.ca"/>' | query input val
+    tj@vision-media.ca

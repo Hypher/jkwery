@@ -47,6 +47,7 @@ function parseArguments() {
 
   while (args.length) {
     switch (arg = args.shift()) {
+      case 'val':
       case 'text':
       case 'width':
       case 'height':
@@ -89,6 +90,7 @@ function parse(html, calls) {
             // TODO: fix me! jsdom breakage
             call[2][0] = call[1];
             call[1] = 'attr';
+          case 'val':
           case 'attr':
           case 'text':
           case 'hasClass':
