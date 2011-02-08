@@ -47,7 +47,11 @@ function parseArguments() {
 
   while (args.length) {
     switch (arg = args.shift()) {
+      case 'parent':
+        calls.push(['method', arg])
+        break;
       case 'attr':
+      case 'hasClass':
         calls.push(['method', arg, required(1)])
         break;
       default:
@@ -74,7 +78,11 @@ function parse(html, calls) {
     switch (call[0]) {
       case 'method':
         switch (call[1]) {
+          case 'parent':
+            ctx = ctx.parent();
+            break;
           case 'attr':
+          case 'hasClass':
             console.log(ctx[call[1]].apply(ctx, call[2]));
             process.exit();
             break;
