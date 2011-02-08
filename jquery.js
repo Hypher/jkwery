@@ -74,7 +74,6 @@ exports.getJQueryProps = function() {
 
 	var jQueryProps = {
 		length:false,
-		context:false,
 		selector:false,
 		
 		//tagName:true

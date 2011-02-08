@@ -73,6 +73,7 @@ function parseArguments() {
         return params;
     }
 
+	
     while (args.length) {
         arg = args.shift();
         if (arg in aliases) arg = aliases[arg];
@@ -81,7 +82,6 @@ function parseArguments() {
 			case 'width':
 			case 'height':
 			case 'outerHTML':
-			case 'length':
 			case 'tagName':
 				calls.push(new Call(arg));
 				break;
@@ -91,6 +91,7 @@ function parseArguments() {
 					arg = arg.substr(1, arg.length-2);
 					escaped = true;
 				}
+				
 				var fndef; // any jQueryFns function name?
 				if (!escaped && (fndef = jQueryFns[arg])) {
 					var params = parseParams(fndef);
@@ -139,9 +140,6 @@ function processHTML(html, calls) {
 				case 'width':
 				case 'height':
 					returns(ctx.attr(call.name));
-				break;
-				case 'length':
-					returns(ctx.length);
 				break;
 				case 'outerHTML':
 					ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
