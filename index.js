@@ -54,6 +54,8 @@ function parseArguments() {
       case 'width':
       case 'height':
       case 'parent':
+      case 'next':
+      case 'prev':
         calls.push(['method', arg, []])
         break;
       case 'get':
@@ -90,6 +92,8 @@ function parse(html, calls) {
           case 'eq':
           case 'first':
           case 'last':
+          case 'prev':
+          case 'next':
             ctx = ctx[call[1]].apply(ctx, call[2]);
             break;
           case 'parent':

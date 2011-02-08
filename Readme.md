@@ -43,3 +43,8 @@
   
     $ echo $list | query ul li get 1 text
     two
+  
+  Get third li's text using `next`:
+  
+    $ echo $list | query ul li get 1 next text
+    three
