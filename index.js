@@ -66,10 +66,8 @@ function parseArguments() {
 function parse(html, calls) {
   var window = jsdom.jsdom(html, null, jsdomOptions).createWindow()
     , $ = jquery.create(window)
-    , call
-    , ctx;
-
-  if (0 == calls.length) calls = [['selector', '*']];
+    , ctx = $('*')
+    , call;
 
   while (call = calls.shift()) {
     switch (call[0]) {
@@ -81,7 +79,7 @@ function parse(html, calls) {
         }
         break;
       case 'selector':
-        ctx = $(call[1]);
+        ctx = ctx.find(call[1]);
     }
   }
 
