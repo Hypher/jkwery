@@ -47,6 +47,7 @@ function parseArguments() {
 
   while (args.length) {
     switch (arg = args.shift()) {
+      case 'text':
       case 'width':
       case 'height':
       case 'parent':
@@ -89,6 +90,7 @@ function parse(html, calls) {
             call[2][0] = call[1];
             call[1] = 'attr';
           case 'attr':
+          case 'text':
           case 'hasClass':
             console.log(ctx[call[1]].apply(ctx, call[2]));
             process.exit();

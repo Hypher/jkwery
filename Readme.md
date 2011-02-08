@@ -26,4 +26,10 @@
 
   Grab width or height attributes:
   
-    $ echo '<div class="user" width="300"></div>' | ./index.js div.user width
+    $ echo '<div class="user" width="300"></div>' | query div.user width
+    300
+
+  Output element text:
+  
+    $ echo '<p>very <em>slick</em></p>' | query p text
+    very slick
