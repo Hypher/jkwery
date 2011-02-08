@@ -49,6 +49,8 @@ function parseArguments() {
     switch (arg = args.shift()) {
       case 'val':
       case 'text':
+      case 'first':
+      case 'last':
       case 'width':
       case 'height':
       case 'parent':
@@ -82,6 +84,10 @@ function parse(html, calls) {
     switch (call[0]) {
       case 'method':
         switch (call[1]) {
+          case 'first':
+          case 'last':
+            ctx = ctx[call[1]].apply(ctx, call[2]);
+            break;
           case 'parent':
             ctx = ctx.parent();
             break;
