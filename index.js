@@ -45,8 +45,8 @@ function parseArguments() {
     process.exit(1);
   }
 
-  while (arg = args.shift()) {
-    switch (arg) {
+  while (args.length) {
+    switch (arg = args.shift()) {
       case 'attr':
         calls.push(['method', arg, required(1)])
         break;
@@ -74,6 +74,7 @@ function parse(html, calls) {
         switch (call[1]) {
           case 'attr':
             console.log(ctx[call[1]].apply(ctx, call[2]));
+            process.exit();
             break;
         }
         break;
