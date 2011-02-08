@@ -37,32 +37,36 @@ stdin
 function parseArguments() {
   var arg
     , args = process.argv.slice(2)
-    , options = {};
+    , calls = [];
 
   while (args.length) {
     arg = args.shift();
     switch (arg) {
       default:
-        options.selectors = options.selectors || [];
-        options.selectors.push(arg);
+        calls.push(['selector', arg])
     }
   }
 
-  parse(buf, options);
+  parse(buf, calls);
 }
 
 /**
  * Parse and apply jQuery.
  */
 
-function parse(html, options) {
+function parse(html, calls) {
   var window = jsdom.jsdom(html, null, jsdomOptions).createWindow()
     , $ = jquery.create(window)
-    , selectors = options.selectors || ['*']
+    , call
     , ctx;
 
-  while (selectors.length) {
-    ctx = $(selectors.shift());
+  if (0 == calls.length) calls = [['selector', '*']];
+
+  while (call = calls.shift()) {
+    switch (call[0]) {
+      case 'selector':
+        ctx = $(call[1]);
+    }
   }
 
   console.log(ctx.html());  
