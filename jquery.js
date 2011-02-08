@@ -37,7 +37,7 @@ exports.getJQueryFns = function() {
 		
 		add: fn(1),
 		andSelf: fn(),
-		attr: fn(1),
+		attr: v(1),
 		children: fn(0,1),
 		closest: fn(1),
 		contents: fn(),

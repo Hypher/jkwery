@@ -144,7 +144,7 @@ function processHTML(html, calls) {
 					returns(ctx.length);
 				break;
 				case 'outerHTML':
-					var ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
+					ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
 				break;
 				case 'tagName':
 					returns(ctx.map(function(){ return this.tagName; }).get().join('\n'));
