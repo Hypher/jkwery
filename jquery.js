@@ -45,6 +45,7 @@ exports.getJQueryFns = function() {
 		filter: fn(1),
 		find: fn(1),
 		first: fn(),
+		get: v(1),
 		has: fn(1),
 		hasClass: v(1),
 		html: v(0),
@@ -67,6 +68,18 @@ exports.getJQueryFns = function() {
 		
 	};
 	return jQueryFns;
+}
+
+exports.getJQueryProps = function() {
+
+	var jQueryProps = {
+		length:false,
+		context:false,
+		selector:false,
+		
+		//tagName:true
+	};
+	return jQueryProps;
 }
 
 exports.create = function( window, undefined ) {
