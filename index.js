@@ -39,9 +39,18 @@ function parseArguments() {
     , args = process.argv.slice(2)
     , calls = [];
 
+  function required() {
+    if (args.length) return [args.shift()];
+    console.log(arg + ' requires an argument');
+    process.exit(1);
+  }
+
   while (args.length) {
     arg = args.shift();
     switch (arg) {
+      case 'attr':
+        calls.push(['method', arg, required(1)])
+        break;
       default:
         calls.push(['selector', arg])
     }
@@ -64,6 +73,13 @@ function parse(html, calls) {
 
   while (call = calls.shift()) {
     switch (call[0]) {
+      case 'method':
+        switch (call[1]) {
+          case 'attr':
+            console.log(ctx[call[1]].apply(ctx, call[2]));
+            break;
+        }
+        break;
       case 'selector':
         ctx = $(call[1]);
     }
