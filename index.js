@@ -46,18 +46,13 @@ extend(String.prototype, {wordwrap: function wordwrap(len, sep) {
 	return lines.join('\n');
 }});
 
-extend(Object.prototype, {find: function find(val) {
-	for(var p in this)
-		if(this.hasOwnProperty(p) && this[p] === val)
-			return p;
-}});
-extend(Object.prototype, {findAll: function findAll(val) {
+function findAll(obj, val) {
 	var ret = [];
-		for(var p in this)
-				if(this.hasOwnProperty(p) && this[p] === val)
-			ret.push(p);
+		for(var p in obj)
+			if(obj.hasOwnProperty(p) && obj[p] === val)
+				ret.push(p);
 	return ret;
-}});
+};
 
 /**
  *  Input command aliases
@@ -74,7 +69,7 @@ function printHelp() {
 	function listProps(props) {
 		var ret = [];
 		for(var p in props) {
-			var al = aliases.findAll(p);
+			var al = findAll(aliases, p);
 			if(al.length)
 				ret.push(p+'\xA0('+al.join(',\xA0')+')');
 			else
@@ -135,6 +130,7 @@ function parseArguments() {
 	var jQueryProps = jquery.getJQueryProps();
 	
 	var pendingParams = 0; // if nonzero, next args can be optional params
+	var noMoreParams = false; // if an arg is followed by a comma, no more optional args are accepted
 	var calls = [];
 
 	function escapeArg(arg) {
@@ -151,7 +147,7 @@ function parseArguments() {
 			process.exit(1);
 		}
 		// optional params ?
-		pendingParams = (fndef.length > 2) ? fndef[2] - fndef[1] : 0;
+		pendingParams = noMoreParams ? 0 : (fndef.length > 2) ? fndef[2] - fndef[1] : 0;
 		
 		return params;
 	}
@@ -161,6 +157,13 @@ function parseArguments() {
 		arg = args.shift();
 		
 		if (arg in aliases) arg = aliases[arg];
+		
+		if (arg[arg.length-1] == ',') {
+			noMoreParams = true;
+			arg = arg.substr(0, arg.length-1);
+		} else {
+			noMoreParams = false;
+		}
 		
 		switch (arg) {
 			// handle special cases
