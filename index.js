@@ -185,6 +185,9 @@ function parseArguments() {
 			//case 'special':
 			//	calls.push(new Call(arg));
 			//break;
+			case ',':
+				noMoreParams = true;
+			break;
 			default:
 				var escaped = escapeArg(arg);
 				if (escaped !== false) {
