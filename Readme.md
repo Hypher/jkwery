@@ -64,3 +64,19 @@
     <li>one</li>
     <li>two</li>
 
+  Use commas to cope with undesired optional parameters:
+
+    $ echo '<div class="a"></div><div><p>in</p></div><p>out</p>' | jkwery div.a nextAll p -o
+    <p>in</p>
+
+    $ echo '<div class="a"></div><div><p>in</p></div><p>out</p>' | jkwery div.a nextAll, p -o
+    <p>out</p>
+
+  Use escaping to force a value:
+
+    $ echo '<next />' | jkwery next -o
+    
+    $ echo '<next />' | jkwery '"next"' -o
+    <next></next>
+
+    
