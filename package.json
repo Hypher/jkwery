@@ -1,7 +1,7 @@
 {
   "name": "xquery",
   "description": "command-line jquery",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "keywords": ["jquery", "html", "dom", "parser"],
   "author": "P Gotab and TJ Holowaychuk",
   "main": "index",
