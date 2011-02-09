@@ -20,10 +20,18 @@ var jsdomOptions = {
 };
 
 /**
- *  Input command aliases
+ *  Some usefull things
  */
 
-String.prototype.wordwrap = function wordwrap(len, sep) {
+function extend(obj, props) {
+	Object.getOwnPropertyNames(props).forEach(function(prop) {
+		var descriptor = Object.getOwnPropertyDescriptor(props, prop);
+		descriptor.enumerable = false;
+		Object.defineProperty(obj, prop, descriptor);
+	});
+};
+
+extend(String.prototype, {wordwrap: function wordwrap(len, sep) {
 	if(sep == undefined) sep = '\n';
 	var lines = [];
 	var i=0;
@@ -36,13 +44,13 @@ String.prototype.wordwrap = function wordwrap(len, sep) {
 	
 	lines.push(this.substr(i));
 	return lines.join('\n');
-};
+}});
 
-Object.prototype.find = function find(val) {
+extend(Object.prototype, {find: function find(val) {
 	for(var p in this)
 		if(this.hasOwnProperty(p) && this[p] === val)
 			return p;
-}
+}});
 
 /**
  *  Input command aliases
@@ -64,7 +72,6 @@ function printHelp() {
 	console.log("All these jQuery and DOMElement attributes are supported:");
 	var jprops = jquery.getJQueryProps(), props = [];
 	for(var p in jprops) {
-		if(!jprops.hasOwnProperty(p)) continue;
 		props.push(p);
 		if(p = aliases.find(p))
 			props[props.length-1] += '\xA0('+p+')';
@@ -74,7 +81,6 @@ function printHelp() {
 	console.log("All these jQuery functions are supported:");
 	var jfns = jquery.getJQueryFns(), fns = [];
 	for(var p in jfns) {
-		if(!jfns.hasOwnProperty(p)) continue;
 		fns.push(p);
 		if(p = aliases.find(p))
 			props[props.length-1] += '\xA0('+p+')';
