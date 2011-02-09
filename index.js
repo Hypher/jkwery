@@ -51,6 +51,13 @@ extend(Object.prototype, {find: function find(val) {
 		if(this.hasOwnProperty(p) && this[p] === val)
 			return p;
 }});
+extend(Object.prototype, {findAll: function findAll(val) {
+	var ret = [];
+        for(var p in this)
+                if(this.hasOwnProperty(p) && this[p] === val)
+			ret.push(p);
+	return ret;
+}});
 
 /**
  *  Input command aliases
@@ -59,10 +66,24 @@ extend(Object.prototype, {find: function find(val) {
 var aliases = {
 	'get': 'eq',
 	'count': 'length',
+	'len': 'length',
 	'outer': 'outerHTML'
 };
 
+
 function printHelp() {
+	function listProps(props) {
+		var ret = [];
+		for(var p in props) {
+			var al = aliases.findAll(p);
+			if(al.length)
+				ret.push(p+'\xA0('+al.join(',\xA0')+')');
+			else
+				ret.push(p);
+		}
+		return ret.join(', ');
+	}
+
 	console.log("Usage: xquery [--explain] [function [args, ...] | selector | attribute] ...");
 	console.log("Parse stdin as an HTML document using jQuery and output results as HTML,")
 	console.log("one matching element per line.");
@@ -70,22 +91,12 @@ function printHelp() {
 	console.log("  --explain outputs step-by-step what is done.");
 	console.log();
 	console.log("All these jQuery and DOMElement attributes are supported:");
-	var jprops = jquery.getJQueryProps(), props = [];
-	for(var p in jprops) {
-		props.push(p);
-		if(p = aliases.find(p))
-			props[props.length-1] += '\xA0('+p+')';
-	}
-	console.log(props.join(', ').wordwrap(80));
+	var jprops = jquery.getJQueryProps();
+	console.log(listProps(jprops).wordwrap(80));
 	console.log();
 	console.log("All these jQuery functions are supported:");
-	var jfns = jquery.getJQueryFns(), fns = [];
-	for(var p in jfns) {
-		fns.push(p);
-		if(p = aliases.find(p))
-			props[props.length-1] += '\xA0('+p+')';
-	}
-	console.log(fns.join(', ').wordwrap(80));
+	var jfns = jquery.getJQueryFns();
+	console.log(listProps(jfns).wordwrap(80));
 }
 
 
@@ -210,7 +221,7 @@ function processHTML(html, calls) {
 			}
 			returns(ctx.map(function(){
 					if(call.htmlProp) return this[call.name];
-					else return $(this)[call.name][0];
+					else return $(this)[call.name];
 				}).get().join('\n'));
 		} else {
             switch (call.name) {
