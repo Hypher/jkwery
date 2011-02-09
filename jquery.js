@@ -41,6 +41,8 @@ exports.getJQueryFns = function() {
 		children: fn(0,1),
 		closest: fn(1),
 		contents: fn(),
+		css: v(1),
+		end: fn(),
 		eq: fn(1),
 		filter: fn(1),
 		find: fn(1),
@@ -49,6 +51,7 @@ exports.getJQueryFns = function() {
 		has: fn(1),
 		hasClass: v(1),
 		html: v(0),
+		index: fn(0,1),
 		is: v(1),
 		last: fn(),
 		next: fn(0,1),
@@ -64,6 +67,8 @@ exports.getJQueryFns = function() {
 		prevUntil: fn(1),
 		siblings: fn(0,1),
 		slice: fn(2),
+		size: fn(),
+		slice: fn(1,2),
 		text: v(0),
 		val: v(0)
 		

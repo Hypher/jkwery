@@ -5,7 +5,7 @@
  */
 
 var jsdom = require('jsdom'),
-    jquery = require('./jquery');
+	jquery = require('./jquery');
 
 
 /**
@@ -13,10 +13,10 @@ var jsdom = require('jsdom'),
  */
 
 var jsdomOptions = {
-    features: {
-        FetchExternalResources: false,
-        ProcessExternalResources: false
-    }
+	features: {
+		FetchExternalResources: false,
+		ProcessExternalResources: false
+	}
 };
 
 /**
@@ -53,8 +53,8 @@ extend(Object.prototype, {find: function find(val) {
 }});
 extend(Object.prototype, {findAll: function findAll(val) {
 	var ret = [];
-        for(var p in this)
-                if(this.hasOwnProperty(p) && this[p] === val)
+		for(var p in this)
+				if(this.hasOwnProperty(p) && this[p] === val)
 			ret.push(p);
 	return ret;
 }});
@@ -101,16 +101,16 @@ function printHelp() {
 
 
 function Call(name, params) {
-    this.name = name;
-    this.params = params;
+	this.name = name;
+	this.params = params;
 }
 Call.prototype.appendParam = function appendParam(param) {
-    this.params.push(param);
+	this.params.push(param);
 };
 
 function JQueryCall(name, params, returnsJQuery) {
-    Call.call(this, name, params);
-    this.returnsJQuery = returnsJQuery;
+	Call.call(this, name, params);
+	this.returnsJQuery = returnsJQuery;
 }
 JQueryCall.prototype = new Call();
 
@@ -124,34 +124,41 @@ function JQueryProp(name, htmlProp) {
  */
 
 function parseArguments() {
-    var arg;
-    var args = process.argv.slice(2);
-    var jQueryFns = jquery.getJQueryFns();
+	var arg;
+	var args = process.argv.slice(2);
+	var jQueryFns = jquery.getJQueryFns();
 	var jQueryProps = jquery.getJQueryProps();
 	
-    var pendingParams = 0; // if nonzero, next args can be optional params
-    var calls = [];
+	var pendingParams = 0; // if nonzero, next args can be optional params
+	var calls = [];
 
-    function parseParams(fndef) {
-        var params = args.splice(0, fndef[1]);
-        if (params.length < fndef[1]) {
-            console.error(arg + ' requires at least ' + fndef[1] + ' argument' + (fndef[1] > 1 ? 's' : ''));
-            process.exit(1);
-        }
-        // optional params ?
+	function escapeArg(arg) {
+		if (arg[0] === "'" || arg[0] === '"') {
+			return arg.substr(1, arg.length-2);
+		}
+		return false;
+	}
+	
+	function parseParams(fndef) {
+		var params = args.splice(0, fndef[1]).map(function(arg){ return escapeArg(arg)||arg; });
+		if (params.length < fndef[1]) {
+			console.error(arg + ' requires at least ' + fndef[1] + ' argument' + (fndef[1] > 1 ? 's' : ''));
+			process.exit(1);
+		}
+		// optional params ?
 		pendingParams = (fndef.length > 2) ? fndef[2] - fndef[1] : 0;
 		
-        return params;
-    }
+		return params;
+	}
 
 	
-    while (args.length) {
-        arg = args.shift();
+	while (args.length) {
+		arg = args.shift();
 		
-        if (arg in aliases) arg = aliases[arg];
+		if (arg in aliases) arg = aliases[arg];
 		
-        switch (arg) {
-            // handle special cases
+		switch (arg) {
+			// handle special cases
 			case '--explain':
 				explain = true;
 			break;
@@ -164,9 +171,9 @@ function parseArguments() {
 				calls.push(new Call(arg));
 				break;
 			default:
-				var escaped = false;
-				if (arg[0] === "'" || arg[0] === '"') {
-					arg = arg.substr(1, arg.length-2);
+				var escaped = escapeArg(arg);
+				if (escaped !== false) {
+					arg = escaped;
 					escaped = true;
 				}
 				
@@ -186,8 +193,8 @@ function parseArguments() {
 					}
 				}
 			// end default case
-        }
-    }
+		}
+	}
 
 	return calls;
 }
@@ -197,24 +204,24 @@ function parseArguments() {
  */
 
 function processHTML(html, calls) {
-    var normalized = wrap(html),
-        wrapped = html != normalized,
-        window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow(),
-        $ = jquery.create(window),
-        ctx = $(wrapped ? 'body' : '*'),
+	var normalized = wrap(html),
+		wrapped = html != normalized,
+		window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow(),
+		$ = jquery.create(window),
+		ctx = $(wrapped ? 'body' : '*'),
 		ret,
-        call;
+		call;
 	
-    while (call = calls.shift()) {
+	while (call = calls.shift()) {
 		if (call instanceof JQueryCall) {
-            if (call.returnsJQuery) {
-                ctx = ctx[call.name].apply(ctx, call.params);
-				if(explain) console.error("Call $."+call.name+"("+call.params.join(',')+") ["+ctx.length+" item"+(ctx.length?'s':'')+"]");
-            } else {
+			if (call.returnsJQuery) {
+				ctx = ctx[call.name].apply(ctx, call.params);
+				if(explain) console.error("Call $."+call.name+"("+call.params.join(',')+") ["+ctx.length+" item"+(ctx.length>1?'s':'')+"]");
+			} else {
 				if(explain) console.error("Return $."+call.name+"("+call.params.join(',')+")");
-                returns(ctx[call.name].apply(ctx, call.params)); // return value
-            }
-        } else if (call instanceof JQueryProp) {
+				returns(ctx[call.name].apply(ctx, call.params)); // return value
+			}
+		} else if (call instanceof JQueryProp) {
 			if(explain) {
 				if(call.htmlProp) console.error("Return [DOMElement]."+call.name+" of each $");
 				else console.error("Return each $."+call.name);
@@ -224,30 +231,30 @@ function processHTML(html, calls) {
 					else return $(this)[call.name];
 				}).get().join('\n'));
 		} else {
-            switch (call.name) {
+			switch (call.name) {
 				case 'outerHTML':
 					ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
 					if(explain) console.error("outerHTML wraps all $ elements in a separate document");
 				break;
 				default:
 					console.error("Unknown call "+call.name);
-            }
-        }
-    }
+			}
+		}
+	}
 
-    var output = [];
-    ctx.each(function () {
-        output.push($(this).html());
-    });
-    returns(output.join('\n'));
+	var output = [];
+	ctx.each(function () {
+		output.push($(this).html());
+	});
+	returns(output.join('\n'));
 }
 
 function returns(value) {
-    console.log(value);
-    if (typeof value === 'boolean' || typeof value === 'number' && value == parseInt(value)) {
+	console.log(value);
+	if (typeof value === 'boolean' || typeof value === 'number' && value == parseInt(value)) {
 		process.exit(Number(value));
 	}
-    process.exit();
+	process.exit();
 }
 
 /**
@@ -255,9 +262,9 @@ function returns(value) {
  */
 
 function wrap(html) {
-    if (!~html.indexOf('<body')) html = '<body>' + html + '</body>';
-    if (!~html.indexOf('<html')) html = '<html>' + html + '</html>';
-    return html;
+	if (!~html.indexOf('<body')) html = '<body>' + html + '</body>';
+	if (!~html.indexOf('<html')) html = '<html>' + html + '</html>';
+	return html;
 }
 
 
@@ -266,7 +273,7 @@ function wrap(html) {
  */
 
 var stdin = process.openStdin(),
-    buf = '';
+	buf = '';
 
 var explain = false; // this mode can be enabled in parseArguments
 
