@@ -79,6 +79,7 @@ exports.getJQueryProps = function() {
 		selector:false,
 		
 		tagName:true,
+		value:true,
 		width:true,
 		height:true
 	};

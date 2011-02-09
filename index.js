@@ -57,7 +57,7 @@ extend(Object.prototype, {find: function find(val) {
  */
 
 var aliases = {
-    'get': 'eq',
+	'get': 'eq',
 	'count': 'length',
 	'outer': 'outerHTML'
 };
