@@ -1,11 +1,11 @@
 {
-  "name": "xquery",
-  "description": "command-line jquery",
+  "name": "jKwery",
+  "description": "Another command-line jQuery",
   "version": "0.1.0",
   "keywords": ["jquery", "html", "dom", "parser"],
   "author": "P Gotab and TJ Holowaychuk",
   "main": "index",
-  "bin": { "xquery": "./index.js" },
+  "bin": { "jkwery": "./index.js" },
   "dependencies": {
     "jsdom": ">= 0.1.0"
   },
