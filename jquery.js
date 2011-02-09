@@ -64,6 +64,7 @@ exports.getJQueryFns = function() {
 		prevUntil: fn(1),
 		siblings: fn(0,1),
 		slice: fn(2),
+		text: v(0),
 		val: v(0)
 		
 	};

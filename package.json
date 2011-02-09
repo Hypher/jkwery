@@ -1,11 +1,14 @@
 {
-  "name": "query",
+  "name": "xquery",
   "description": "command-line jquery",
   "version": "0.0.1",
-  "keywords": ["jquery", "html", "jsdom", "dom"],
-  "author": "TJ Holowaychuk",
+  "keywords": ["jquery", "html", "dom", "parser"],
+  "author": "P Gotab and TJ Holowaychuk",
   "main": "index",
-  "bin": { "query": "./index.js" },
+  "bin": { "xquery": "./index.js" },
+  "dependencies": {
+    "jsdom": ">= 0.1.0"
+  },
   "engines": {
     "node": "*"
   }
