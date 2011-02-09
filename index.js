@@ -23,11 +23,54 @@ var jsdomOptions = {
  *  Input command aliases
  */
 
+String.prototype.wordwrap = function wordwrap(len, sep) {
+	if(sep == undefined) sep = '\n';
+	var lines = [];
+	var i=0;
+	while(this.length - i > len) {
+		var pos = this.lastIndexOf(' ', i + len);
+		if(pos < i) pos = i + len;
+		lines.push(this.substring(i, pos));
+		i = pos+1;
+	}
+	
+	lines.push(this.substr(i));
+	return lines.join('\n');
+};
+
+Object.prototype.find = function find(val) {
+	for(var p in this)
+		if(this.hasOwnProperty(p) && this[p] === val)
+			return p;
+}
+
+/**
+ *  Input command aliases
+ */
+
 var aliases = {
     'get': 'eq',
 	'count': 'length',
 	'outer': 'outerHTML'
 };
+
+function printHelp() {
+	console.log("Usage: xquery [--explain] [function [args, ...] | selector | attribute] ...");
+	console.log("Parse stdin as an HTML document using jQuery and output results as HTML,")
+	console.log("one matching element per line.");
+	console.log();
+	console.log("  --explain outputs step-by-step what is done.");
+	console.log();
+	console.log("All these jQuery and DOMElement attributes are supported:");
+	var jprops = jquery.getJQueryProps(), props = [];
+	for(var p in jprops) { props.push(p); if(p = aliases.find(p)) props[props.length-1] += '\xA0('+p+')'; }
+	console.log(props.join(', ').wordwrap(80));
+	console.log();
+	console.log("All these jQuery functions are supported:");
+	var jfns = jquery.getJQueryFns(), fns = [];
+	for(var p in jfns) { fns.push(p); if(p = aliases.find(p)) props[props.length-1] += '\xA0('+p+')'; }
+	console.log(fns.join(', ').wordwrap(80));
+}
 
 
 function Call(name, params) {
@@ -86,8 +129,8 @@ function parseArguments() {
 				explain = true;
 			break;
 			case '--help':
-				//printHelp(); // TODO
-				return false;
+				printHelp();
+				process.exit();
 			break;
 			
 			case 'outerHTML':
