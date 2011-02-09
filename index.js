@@ -63,12 +63,22 @@ function printHelp() {
 	console.log();
 	console.log("All these jQuery and DOMElement attributes are supported:");
 	var jprops = jquery.getJQueryProps(), props = [];
-	for(var p in jprops) { props.push(p); if(p = aliases.find(p)) props[props.length-1] += '\xA0('+p+')'; }
+	for(var p in jprops) {
+		if(!jprops.hasOwnProperty(p)) continue;
+		props.push(p);
+		if(p = aliases.find(p))
+			props[props.length-1] += '\xA0('+p+')';
+	}
 	console.log(props.join(', ').wordwrap(80));
 	console.log();
 	console.log("All these jQuery functions are supported:");
 	var jfns = jquery.getJQueryFns(), fns = [];
-	for(var p in jfns) { fns.push(p); if(p = aliases.find(p)) props[props.length-1] += '\xA0('+p+')'; }
+	for(var p in jfns) {
+		if(!jfns.hasOwnProperty(p)) continue;
+		fns.push(p);
+		if(p = aliases.find(p))
+			props[props.length-1] += '\xA0('+p+')';
+	}
 	console.log(fns.join(', ').wordwrap(80));
 }
 
