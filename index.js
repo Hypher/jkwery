@@ -182,6 +182,11 @@ function parseArguments() {
 			case '-f':
 				flattenHTML = true;
 			break;
+			case '-of': // me? lazy? No.
+			case '-fo': // if there will be more args i'll do sthg cleaner
+				outerHTML = true;
+				flattenHTML = true;
+			break;
 			//case 'special':
 			//	calls.push(new Call(arg));
 			//break;
