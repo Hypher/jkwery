@@ -66,8 +66,7 @@ extend(Object.prototype, {findAll: function findAll(val) {
 var aliases = {
 	'get': 'eq',
 	'count': 'length',
-	'len': 'length',
-	'outer': 'outerHTML'
+	'len': 'length'
 };
 
 
@@ -84,11 +83,14 @@ function printHelp() {
 		return ret.join(', ');
 	}
 
-	console.log("Usage: xquery [--explain] [function [args, ...] | selector | attribute] ...");
+	console.log("Usage: xquery [OPTIONS] [function [args, ...] | attribute | special | selector] ...");
 	console.log("Parse stdin as an HTML document using jQuery and output results as HTML,")
 	console.log("one matching element per line.");
 	console.log();
-	console.log("  --explain outputs step-by-step what is done.");
+	console.log("OPTIONS are:");
+	console.log("  --outerHTML, -o : outputs the outerHTML of each element instead of innerHTML");
+	console.log("    --flatten, -f : ensures that each matched element is output on a single line");
+	console.log("        --explain : outputs step-by-step what is done.");
 	console.log();
 	console.log("All these jQuery and DOMElement attributes are supported:");
 	var jprops = jquery.getJQueryProps();
@@ -97,6 +99,9 @@ function printHelp() {
 	console.log("All these jQuery functions are supported:");
 	var jfns = jquery.getJQueryFns();
 	console.log(listProps(jfns).wordwrap(80));
+	//console.log();
+	//console.log("These special functions are available:")
+	//console.log("  None yet.");
 }
 
 
@@ -166,10 +171,17 @@ function parseArguments() {
 				printHelp();
 				process.exit();
 			break;
-			
-			case 'outerHTML':
-				calls.push(new Call(arg));
-				break;
+			case '--outerHTML':
+			case '-o':
+				outerHTML = true;
+			break;
+			case '--flatten':
+			case '-f':
+				flattenHTML = true;
+			break;
+			//case 'special':
+			//	calls.push(new Call(arg));
+			//break;
 			default:
 				var escaped = escapeArg(arg);
 				if (escaped !== false) {
@@ -232,19 +244,25 @@ function processHTML(html, calls) {
 				}).get().join('\n'));
 		} else {
 			switch (call.name) {
-				case 'outerHTML':
-					ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
-					if(explain) console.error("outerHTML wraps all $ elements in a separate document");
-				break;
 				default:
 					console.error("Unknown call "+call.name);
 			}
 		}
 	}
 
+	if(outerHTML) {
+		ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
+		if(explain) console.error("outerHTML wraps all $ elements in a separate document");
+	}
+	if(flattenHTML && explain) {
+		console.error("flattenHTML removes newlines from elements' HTML");
+	}
+
 	var output = [];
 	ctx.each(function () {
-		output.push($(this).html());
+		var html = $(this).html();
+		if(flattenHTML) html = html.replace(/\n|\r/g, '');
+		output.push(html);
 	});
 	returns(output.join('\n'));
 }
@@ -275,7 +293,9 @@ function wrap(html) {
 var stdin = process.openStdin(),
 	buf = '';
 
-var explain = false; // this mode can be enabled in parseArguments
+var explain = false; // this mode can be enabled in parseArguments with --explain
+var outerHTML = false; // idem with --outerHTML or -o
+var flattenHTML = false; // item with --flatten or -f
 
 var calls = parseArguments();
 
