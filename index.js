@@ -58,15 +58,14 @@ function parseArguments() {
     var args = process.argv.slice(2);
     var jQueryFns = jquery.getJQueryFns();
 	var jQueryProps = jquery.getJQueryProps();
-
-	var explain = false; // if true, only output what it will do
+	
     var pendingParams = 0; // if nonzero, next args can be optional params
     var calls = [];
 
     function parseParams(fndef) {
         var params = args.splice(0, fndef[1]);
         if (params.length < fndef[1]) {
-            console.log(arg + ' requires at least ' + fndef[1] + ' argument' + (fndef[1] > 1 ? 's' : ''));
+            console.error(arg + ' requires at least ' + fndef[1] + ' argument' + (fndef[1] > 1 ? 's' : ''));
             process.exit(1);
         }
         // optional params ?
@@ -120,35 +119,6 @@ function parseArguments() {
         }
     }
 
-	if(explain) {
-		for(var i=0; i<calls.length; i++) {
-			var call = calls[i];
-			if(call instanceof JQueryCall) {
-				var verb = call.returnsJQuery ? "Call" : "Return";
-				console.log(verb+" $."+call.name+"("+call.params.join(',')+")");
-				if(!call.returnsJQuery && (i < calls.length-1)) {
-					console.log("("+(calls.length-i+1)+" arguments will be ignored)");
-					return false;
-				}
-			} else if(call instanceof JQueryProp) {
-				if(call.htmlProp)
-					console.log("Return [DOMElement]."+call.name+" of each $");
-				else
-					console.log("Return each $."+call.name);
-			} else {
-				switch(call.name) {
-					case 'outerHTML':
-						console.log("outerHTML wraps all $ elements in a separate document");
-					break;
-					default:
-						console.log("Error: unsupported call "+call.name);
-				}
-			}
-		}
-		
-		return false;
-	}
-    
 	return calls;
 }
 
@@ -162,16 +132,23 @@ function processHTML(html, calls) {
         window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow(),
         $ = jquery.create(window),
         ctx = $(wrapped ? 'body' : '*'),
+		ret,
         call;
 	
     while (call = calls.shift()) {
 		if (call instanceof JQueryCall) {
             if (call.returnsJQuery) {
                 ctx = ctx[call.name].apply(ctx, call.params);
+				if(explain) console.error("Call $."+call.name+"("+call.params.join(',')+") ["+ctx.length+" item"+(ctx.length?'s':'')+"]");
             } else {
+				if(explain) console.error("Return $."+call.name+"("+call.params.join(',')+")");
                 returns(ctx[call.name].apply(ctx, call.params)); // return value
             }
         } else if (call instanceof JQueryProp) {
+			if(explain) {
+				if(call.htmlProp) console.error("Return [DOMElement]."+call.name+" of each $");
+				else console.error("Return each $."+call.name);
+			}
 			returns(ctx.map(function(){
 					if(call.htmlProp) return this[call.name];
 					else return $(this)[call.name][0];
@@ -180,9 +157,10 @@ function processHTML(html, calls) {
             switch (call.name) {
 				case 'outerHTML':
 					ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
+					if(explain) console.error("outerHTML wraps all $ elements in a separate document");
 				break;
 				default:
-					console.log("Unknown call "+call.name);
+					console.error("Unknown call "+call.name);
             }
         }
     }
@@ -220,10 +198,9 @@ function wrap(html) {
 var stdin = process.openStdin(),
     buf = '';
 
+var explain = false; // this mode can be enabled in parseArguments
 
 var calls = parseArguments();
-if(!calls) // surely in --explain mode (or --help)
-	process.exit(0);
 
 stdin.setEncoding('utf8');
 stdin.on('data', function (chunk) { buf += chunk; })
