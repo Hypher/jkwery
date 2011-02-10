@@ -4,8 +4,8 @@
  * Module dependencies.
  */
 
-var jsdom = require('jsdom'),
-	jquery = require('./jquery');
+var jsdom = require('jsdom');
+var jquery = require('./jquery');
 
 
 /**
@@ -236,13 +236,20 @@ function parseArguments() {
  */
 
 function processHTML(html, calls) {
-	var normalized = wrap(html),
-		window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow(),
-		$ = jquery.create(window),
+	var normalized = wrap(html);
+	var window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow();
+
+	if(!window.document.documentElement) {
+		console.error("Malformed document.");
+		process.exit(-1);
+	}
+
+	var $ = jquery.create(window),
 		ctx = $('html'),
 		ret,
 		each,
 		call;
+
 	
 	while (call = calls.shift()) {
 		try {
@@ -292,6 +299,7 @@ function processHTML(html, calls) {
 }
 
 function returns(value) {
+	console.log(value);
 	if (typeof value === 'boolean' || value == parseInt(value)) {
 		process.exit(Number(value));
 	}
