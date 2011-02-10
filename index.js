@@ -152,7 +152,7 @@ function parseArguments() {
 		var params = args.splice(0, fndef[1]).map(function(arg){ return escapeArg(arg)||arg; });
 		if (params.length < fndef[1]) {
 			console.error(arg + ' requires at least ' + fndef[1] + ' argument' + (fndef[1] > 1 ? 's' : ''));
-			process.exit(1);
+			process.exit(-1);
 		}
 		// optional params ?
 		pendingParams = noMoreParams ? 0 : (fndef.length > 2) ? fndef[2] - fndef[1] : 0;
@@ -245,27 +245,32 @@ function processHTML(html, calls) {
 		call;
 	
 	while (call = calls.shift()) {
-		if (call instanceof JQueryCall) {
-			if (call.returnsJQuery) {
-				ctx = ctx[call.name].apply(ctx, call.params);
-				if(explain) console.error("Call $."+call.name+"("+call.params.join(',')+") ["+ctx.length+" item"+(ctx.length>1?'s':'')+"]");
+		try {
+			if (call instanceof JQueryCall) {
+				if (call.returnsJQuery) {
+					ctx = ctx[call.name].apply(ctx, call.params);
+					if(explain) console.error("Call $."+call.name+"("+call.params.join(',')+") ["+ctx.length+" item"+(ctx.length>1?'s':'')+"]");
+				} else {
+					if(explain) console.error("Return $."+call.name+"("+call.params.join(',')+")"+(each?" for each $":''));
+					if(each) returns(ctx.map(function(){ ctx=$(this); return ctx[call.name].apply(ctx, call.params); }).get().join('\n'));
+					else returns(ctx[call.name].apply(ctx, call.params)); // return value
+				}
 			} else {
-				if(explain) console.error("Return $."+call.name+"("+call.params.join(',')+")"+(each?" for each $":''));
-				if(each) returns(ctx.map(function(){ ctx=$(this); return ctx[call.name].apply(ctx, call.params); }).get().join('\n'));
-				else returns(ctx[call.name].apply(ctx, call.params)); // return value
+				switch (call.name) {
+					case 'length':
+						if(explain) console.log("Return $.length");
+						returns(ctx.length);
+					break;
+					case 'each':
+						each = true;
+					break;
+					default:
+						console.error("Unknown call "+call.name);
+				}
 			}
-		} else {
-			switch (call.name) {
-				case 'length':
-					if(explain) console.log("Return $.length");
-					returns(ctx.length);
-				break;
-				case 'each':
-					each = true;
-				break;
-				default:
-					console.error("Unknown call "+call.name);
-			}
+		} catch(ex) {
+			console.error(ex);
+			process.exit(-1);
 		}
 	}
 
@@ -287,8 +292,8 @@ function processHTML(html, calls) {
 }
 
 function returns(value) {
-	console.log(value);
-	if (typeof value === 'boolean' || typeof value === 'number' && value == parseInt(value)) {
+	console.log(value, typeof value, parseInt(value));
+	if (typeof value === 'boolean' || value == parseInt(value)) {
 		process.exit(Number(value));
 	}
 	process.exit();
