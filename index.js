@@ -173,6 +173,7 @@ function parseArguments() {
 		} else {
 			noMoreParams = false;
 		}
+		if(arg.length == 0) continue; // ',' case
 		
 		switch (arg) {
 			// handle special cases
@@ -200,9 +201,6 @@ function parseArguments() {
 			case 'each':
 				calls.push(new Call(arg));
 				pendingParams = 0;
-			break;
-			case ',':
-				noMoreParams = true;
 			break;
 			default:
 				var escaped = escapeArg(arg);
