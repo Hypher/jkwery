@@ -88,14 +88,10 @@ function printHelp() {
 	console.log("    --flatten, -f : ensures that each matched element is output on a single line");
 	console.log("        --explain : outputs step-by-step what is done.");
 	console.log();
-	console.log("All these jQuery and DOMElement attributes are supported:");
-	var jprops = jquery.getJQueryProps();
-	console.log(listProps(jprops).wordwrap(80));
-	console.log("* These returning-functions return immediately their values.");
-	console.log();
 	console.log("All these jQuery functions are supported:");
 	var jfns = jquery.getJQueryFns();
 	console.log(listProps(jfns).wordwrap(80));
+	console.log("* These returning-functions return immediately their values.");
 	console.log();
 	console.log("These special functions are available:")
 	console.log("  length (count, nb): returns the number of matched elements");
@@ -117,11 +113,6 @@ function JQueryCall(name, params, returnsJQuery) {
 }
 JQueryCall.prototype = new Call();
 
-function JQueryProp(name, htmlProp) {
-	this.name = name;
-	this.htmlProp = htmlProp || false;
-}
-
 /**
  * Parse argv.
  */
@@ -130,7 +121,6 @@ function parseArguments() {
 	var arg;
 	var args = process.argv.slice(2);
 	var jQueryFns = jquery.getJQueryFns();
-	var jQueryProps = jquery.getJQueryProps();
 	
 	var pendingParams = 0; // if nonzero, next args can be optional params
 	var noMoreParams = false; // if an arg is followed by a comma, no more optional args are accepted
@@ -210,9 +200,6 @@ function parseArguments() {
 				if (!escaped && (fndef = jQueryFns[arg])) {
 					var params = parseParams(fndef);
 					calls.push(new JQueryCall(arg, params, fndef[0]));
-				} else if(!escaped && (arg in jQueryProps)) {
-					calls.push(new JQueryProp(arg, jQueryProps[arg]));
-					pendingParams = 0;
 				} else {
 					if (pendingParams) {
 						calls[calls.length - 1].appendParam(arg);
@@ -253,15 +240,6 @@ function processHTML(html, calls) {
 				if(each) returns(ctx.map(function(){ ctx=$(this); return ctx[call.name].apply(ctx, call.params); }).get().join('\n'));
 				else returns(ctx[call.name].apply(ctx, call.params)); // return value
 			}
-		} else if (call instanceof JQueryProp) {
-			if(explain) {
-				if(call.htmlProp) console.error("Return [DOMElement]."+call.name+" of each $");
-				else console.error("Return each $."+call.name);
-			}
-			returns(ctx.map(function(){
-					if(call.htmlProp) return this[call.name];
-					else return $(this)[call.name];
-				}).get().join('\n'));
 		} else {
 			switch (call.name) {
 				case 'length':

@@ -75,20 +75,6 @@ exports.getJQueryFns = function() {
 	return jQueryFns;
 }
 
-exports.getJQueryProps = function() {
-
-	// if a prop is true, its a DOMElement prop and jQuery.get is called before evaluation
-	var jQueryProps = {
-		selector:false,
-		
-		tagName:true,
-		value:true,
-		width:true,
-		height:true
-	};
-	return jQueryProps;
-}
-
 exports.create = function( window, undefined ) {
 
 window.XMLHttpRequest = function(){};
