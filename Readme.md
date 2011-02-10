@@ -18,6 +18,11 @@
 
 ## Examples
 
+  Get Google redirection page title:
+
+    $ curl http://google.com/ | jkwery title
+    301 Moved
+
   Twitter logo alt text:
   
     $ curl http://twitter.com | jkwery 'a#logo img' attr alt
@@ -32,10 +37,12 @@
   
     $ curl http://twitter.com | jkwery .article '#timeline' hasClass statuses
     true
+    $ echo $?
+    1
 
   Grab width or height attributes:
   
-    $ echo '<div class="user" width="300"></div>' | jkwery div.user width
+    $ echo '<div class="user" width="300"></div>' | jkwery div.user attr width
     300
 
   Output element text:

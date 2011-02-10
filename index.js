@@ -237,10 +237,9 @@ function parseArguments() {
 
 function processHTML(html, calls) {
 	var normalized = wrap(html),
-		wrapped = html != normalized,
 		window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow(),
 		$ = jquery.create(window),
-		ctx = $(wrapped ? 'body>*' : 'html'),
+		ctx = $('html'),
 		ret,
 		each,
 		call;
