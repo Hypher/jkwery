@@ -44,6 +44,8 @@
   
     $ echo '<div class="user" width="300"></div>' | jkwery div.user attr width
     300
+    $ echo $?
+    300
 
   Output element text:
   
@@ -80,10 +82,10 @@
   Use commas to cope with undesired optional parameters:
 
     $ echo '<div class="a"></div><div><p>in</p></div><p>out</p>' | jkwery div.a nextAll p -o
-    <p>in</p>
+    <p>out</p>
 
     $ echo '<div class="a"></div><div><p>in</p></div><p>out</p>' | jkwery div.a nextAll, p -o
-    <p>out</p>
+    <p>in</p>
 
   Use escaping to force a value:
 
