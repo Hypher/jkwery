@@ -1,7 +1,7 @@
 {
   "name": "jkwery",
   "description": "Another command-line jQuery",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "keywords": ["jquery", "html", "dom", "parser"],
   "author": "P Gotab", "contributors": [ "TJ Holowaychuk" ],
   "homepage": "http://github.com/Hypher/jkwery",
