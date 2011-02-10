@@ -291,8 +291,8 @@ function returns(value) {
  */
 
 function wrap(html) {
-	if (!~html.indexOf('<body')) html = '<body>' + html + '</body>';
-	if (!~html.indexOf('<html')) html = '<html>' + html + '</html>';
+	if (!~html.indexOf('<body') && !~html.indexOf('<BODY')) html = '<body>' + html + '</body>';
+	if (!~html.indexOf('<html') && !~html.indexOf('<HTML')) html = '<html>' + html + '</html>';
 	return html;
 }
 
