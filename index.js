@@ -61,7 +61,7 @@ function findAll(obj, val) {
 var aliases = {
 	'get': 'eq',
 	'count': 'length',
-	'len': 'length'
+	'nb': 'length'
 };
 
 
@@ -83,7 +83,7 @@ function printHelp() {
 	console.log("one matching element per line.");
 	console.log();
 	console.log("OPTIONS are:");
-	console.log("  --outerHTML, -o : outputs the outerHTML of each element instead of innerHTML");
+	console.log("  --outerHTML, -o : outputs the outerHTML of each matched element instead of innerHTML");
 	console.log("    --flatten, -f : ensures that each matched element is output on a single line");
 	console.log("        --explain : outputs step-by-step what is done.");
 	console.log();
@@ -94,9 +94,9 @@ function printHelp() {
 	console.log("All these jQuery functions are supported:");
 	var jfns = jquery.getJQueryFns();
 	console.log(listProps(jfns).wordwrap(80));
-	//console.log();
-	//console.log("These special functions are available:")
-	//console.log("  None yet.");
+	console.log();
+	console.log("These special functions are available:")
+	console.log("  length (count, nb): returns the number of matched elements");
 }
 
 
@@ -187,9 +187,9 @@ function parseArguments() {
 				outerHTML = true;
 				flattenHTML = true;
 			break;
-			//case 'special':
-			//	calls.push(new Call(arg));
-			//break;
+			case 'length':
+				calls.push(new Call(arg));
+			break;
 			case ',':
 				noMoreParams = true;
 			break;
@@ -231,7 +231,7 @@ function processHTML(html, calls) {
 		wrapped = html != normalized,
 		window = jsdom.jsdom(normalized, null, jsdomOptions).createWindow(),
 		$ = jquery.create(window),
-		ctx = $(wrapped ? 'body' : '*'),
+		ctx = $(wrapped ? 'body>*' : 'html'),
 		ret,
 		call;
 	
@@ -255,6 +255,10 @@ function processHTML(html, calls) {
 				}).get().join('\n'));
 		} else {
 			switch (call.name) {
+				case 'length':
+					if(explain) console.log("Return $.length");
+					returns(ctx.length);
+				break;
 				default:
 					console.error("Unknown call "+call.name);
 			}
@@ -263,7 +267,7 @@ function processHTML(html, calls) {
 
 	if(outerHTML) {
 		ctx = ctx.map(function(){ return ($('<html/>').append(this))[0]; });
-		if(explain) console.error("outerHTML wraps all $ elements in a separate document");
+		if(explain) console.error("outerHTML wraps all elements in a separate document");
 	}
 	if(flattenHTML && explain) {
 		console.error("flattenHTML removes newlines from elements' HTML");
