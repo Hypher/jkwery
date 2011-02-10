@@ -10,11 +10,11 @@
 
 ## Usage
 
-    $ curl http://test.com/ | jkwery [options] [method [args] | attr | selector] ...
-    method [args] calls a jQuery method on the current elements
-    attr returns this attribute of the matched elements, one per line
+    $ curl http://test.com/ | jkwery [options] [method [args] | special | selector] ...
+    method [args] calls a jQuery method on the current matched elements
+    special does some cool stuff (see below, in the future)
     If none of the above matches, assumes this is a selector (eg find selector)
-    At the end of the process, if no attr was present, outputs innerHTML of current elements
+    At the end of the process, outputs innerHTML of matched elements, or not.
 
 ## Examples
 
@@ -70,6 +70,12 @@
     $ echo '<ul><li>one</li><li>two</li></ul>' | jkwery li -o
     <li>one</li>
     <li>two</li>
+
+  Get multiple attributes:
+
+    $ echo '<p lang="fr" /><p lang="en" />' | jkwery p each attr lang
+    fr
+    en
 
   Use commas to cope with undesired optional parameters:
 
