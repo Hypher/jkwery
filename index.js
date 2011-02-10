@@ -160,6 +160,7 @@ function parseArguments() {
 		
 		if (arg[arg.length-1] == ',') {
 			noMoreParams = true;
+			pendingParams = 0;
 			arg = arg.substr(0, arg.length-1);
 		} else {
 			noMoreParams = false;
@@ -189,6 +190,7 @@ function parseArguments() {
 			break;
 			case 'length':
 				calls.push(new Call(arg));
+				pendingParams = 0;
 			break;
 			case ',':
 				noMoreParams = true;
@@ -206,6 +208,7 @@ function parseArguments() {
 					calls.push(new JQueryCall(arg, params, fndef[0]));
 				} else if(!escaped && (arg in jQueryProps)) {
 					calls.push(new JQueryProp(arg, jQueryProps[arg]));
+					pendingParams = 0;
 				} else {
 					if (pendingParams) {
 						calls[calls.length - 1].appendParam(arg);
