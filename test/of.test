@@ -1,0 +1,4 @@
+basic.html
+p -of
+<p>Lorem <a href="http://ipsum.org/">ipsum</a> dolores.<input name="oui" value="42"></p>
+<p class="empty"></p>
