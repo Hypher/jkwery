@@ -31,20 +31,33 @@ function extend(obj, props) {
 	});
 };
 
-extend(String.prototype, {wordwrap: function wordwrap(len, sep) {
-	if(sep == undefined) sep = '\n';
-	var lines = [];
-	var i=0;
-	while(this.length - i > len) {
-		var pos = this.lastIndexOf(' ', i + len);
-		if(pos < i) pos = i + len;
-		lines.push(this.substring(i, pos));
-		i = pos+1;
+
+extend(String.prototype, {
+	dup: function dup(nb) {
+		if(!nb) return '';
+		var ret = [];
+		while(nb--) ret.push(this);
+		return ret.join('');
+	},
+	wordwrap: function wordwrap(len, pad, sep) {
+		if(sep == undefined) sep = '\n';
+		if(pad == undefined) pad = '';
+		else if(typeof pad == 'number') pad = ' '.dup(pad);
+		len -= pad.length;
+		var lines = [];
+		var i=0;
+		while(this.length - i > len) {
+			var pos = this.lastIndexOf(' ', i + len);
+			if(pos < i) pos = i + len;
+			lines.push(pad+this.substring(i, pos));
+			i = pos+1;
+		}
+		
+		lines.push(pad+this.substr(i));
+		return lines.join('\n');
 	}
-	
-	lines.push(this.substr(i));
-	return lines.join('\n');
-}});
+});
+
 
 function findAll(obj, val) {
 	var ret = [];
@@ -61,7 +74,8 @@ function findAll(obj, val) {
 var aliases = {
 	'get': 'eq',
 	'count': 'length',
-	'nb': 'length'
+	'nb': 'length',
+	'up': 'parent,'
 };
 
 
@@ -90,12 +104,13 @@ function printHelp() {
 	console.log();
 	console.log("All these jQuery functions are supported:");
 	var jfns = jquery.getJQueryFns();
-	console.log(listProps(jfns).wordwrap(80));
-	console.log("* These returning-functions return immediately their values.");
+	console.log(listProps(jfns).wordwrap(80, 2));
+	console.log("  * These returning-functions return immediately their values.");
 	console.log();
 	console.log("These special functions are available:")
 	console.log("  length (count, nb): returns the number of matched elements");
 	console.log("  each: will call the next returning-function on each matched elements");
+	console.log("  up: equivalent to 'parent,'");
 }
 
 
