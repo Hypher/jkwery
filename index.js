@@ -292,7 +292,6 @@ function processHTML(html, calls) {
 }
 
 function returns(value) {
-	console.log(value, typeof value, parseInt(value));
 	if (typeof value === 'boolean' || value == parseInt(value)) {
 		process.exit(Number(value));
 	}
