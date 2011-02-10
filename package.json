@@ -1,9 +1,11 @@
 {
   "name": "jkwery",
   "description": "Another command-line jQuery",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "keywords": ["jquery", "html", "dom", "parser"],
-  "author": "P Gotab and TJ Holowaychuk",
+  "author": "P Gotab", "contributors": [ "TJ Holowaychuk" ],
+  "homepage": "http://github.com/Hypher/jkwery",
+  "repository": { "type": "git", "url": "http://github.com/Hypher/jkwery.git" },
   "main": "index",
   "bin": { "jkwery": "./index.js" },
   "dependencies": {
