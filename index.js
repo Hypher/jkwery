@@ -70,6 +70,7 @@ function printHelp() {
 		var ret = [];
 		for(var p in props) {
 			var al = findAll(aliases, p);
+			if(props[p][0] === false) p+='*'; // returning-functions
 			if(al.length)
 				ret.push(p+'\xA0('+al.join(',\xA0')+')');
 			else
@@ -90,6 +91,7 @@ function printHelp() {
 	console.log("All these jQuery and DOMElement attributes are supported:");
 	var jprops = jquery.getJQueryProps();
 	console.log(listProps(jprops).wordwrap(80));
+	console.log("* These returning-functions return immediately their values.");
 	console.log();
 	console.log("All these jQuery functions are supported:");
 	var jfns = jquery.getJQueryFns();
@@ -97,6 +99,7 @@ function printHelp() {
 	console.log();
 	console.log("These special functions are available:")
 	console.log("  length (count, nb): returns the number of matched elements");
+	console.log("  each: will call the next returning-function on each matched elements");
 }
 
 
@@ -189,6 +192,7 @@ function parseArguments() {
 				flattenHTML = true;
 			break;
 			case 'length':
+			case 'each':
 				calls.push(new Call(arg));
 				pendingParams = 0;
 			break;
@@ -236,6 +240,7 @@ function processHTML(html, calls) {
 		$ = jquery.create(window),
 		ctx = $(wrapped ? 'body>*' : 'html'),
 		ret,
+		each,
 		call;
 	
 	while (call = calls.shift()) {
@@ -244,8 +249,9 @@ function processHTML(html, calls) {
 				ctx = ctx[call.name].apply(ctx, call.params);
 				if(explain) console.error("Call $."+call.name+"("+call.params.join(',')+") ["+ctx.length+" item"+(ctx.length>1?'s':'')+"]");
 			} else {
-				if(explain) console.error("Return $."+call.name+"("+call.params.join(',')+")");
-				returns(ctx[call.name].apply(ctx, call.params)); // return value
+				if(explain) console.error("Return $."+call.name+"("+call.params.join(',')+")"+(each?" for each $":''));
+				if(each) returns(ctx.map(function(){ ctx=$(this); return ctx[call.name].apply(ctx, call.params); }).get().join('\n'));
+				else returns(ctx[call.name].apply(ctx, call.params)); // return value
 			}
 		} else if (call instanceof JQueryProp) {
 			if(explain) {
@@ -261,6 +267,9 @@ function processHTML(html, calls) {
 				case 'length':
 					if(explain) console.log("Return $.length");
 					returns(ctx.length);
+				break;
+				case 'each':
+					each = true;
 				break;
 				default:
 					console.error("Unknown call "+call.name);
