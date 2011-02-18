@@ -34,10 +34,7 @@ function extend(obj, props) {
 
 extend(String.prototype, {
 	dup: function dup(nb) {
-		if(!nb) return '';
-		var ret = [];
-		while(nb--) ret.push(this);
-		return ret.join('');
+		return new Array(nb+1).join(this);
 	},
 	wordwrap: function wordwrap(len, pad, sep) {
 		if(sep == undefined) sep = '\n';
