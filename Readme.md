@@ -8,6 +8,8 @@
 
     $ npm install jkwery
 
+    You should have [node.js](https://github.com/joyent/node/wiki/Installation) and [npm](http://npmjs.org/)
+
 ## Usage
 
     $ curl http://test.com/ | jkwery [options] [method [args] | special | selector] ...
